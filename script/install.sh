@@ -21,7 +21,7 @@ download() {
     version="$(sed 'y/,/\n/' "$temp_file" | grep 'tag_name' | awk -F '"' '{print $4}')"
     "rm" "$temp_file"
     local package="ddns-go-linux-amd64-v3.tar.gz"
-    curl -L "https://github.com/domaingts/ddns-go/releases/download/$version/$package" -o "$TEMPD/$package"
+    curl -L --retry 5 --retry-delay 10 --retry-max-time 60 "https://github.com/domaingts/ddns-go/releases/download/$version/$package" -o "$TEMPD/$package"
     tar Cxzvf "$TEMPD" "$TEMPD/$package"
     location="$TEMPD/ddns-go"
     mv "$location" /usr/local/bin/
