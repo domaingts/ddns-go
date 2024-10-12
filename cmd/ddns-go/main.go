@@ -26,10 +26,10 @@ import (
 var (
 	versionFlag    bool
 	updateFlag     bool
-	listen         string
 	every          int
 	ipCacheTimes   int
 	configFilePath string
+	parameterPath  string
 	noWebService   bool
 	skipVerify     bool
 	customDNS      string
@@ -58,7 +58,6 @@ var rootCmd = &cobra.Command{
 func init() {
 	rootCmd.Flags().BoolVarP(&versionFlag, "version", "v", false, "ddns-go version")
 	rootCmd.Flags().BoolVarP(&updateFlag, "update", "u", false, "Upgrade ddns-go to the latest version")
-	rootCmd.Flags().StringVarP(&listen, "listen", "l", ":9876", "Listen address")
 	rootCmd.Flags().StringVarP(&configFilePath, "config", "c", "", "Config file path")
 	rootCmd.Flags().BoolVar(&noWebService, "noweb", false, "Disable web service")
 	rootCmd.Flags().IntVarP(&every, "frequency", "f", 300, "Update frequency(seconds)")
@@ -66,6 +65,7 @@ func init() {
 	rootCmd.Flags().BoolVar(&skipVerify, "skipVerify", false, "Skip certificate verification")
 	rootCmd.Flags().StringVar(&customDNS, "dns", "", "Custom DNS server address, example: 8.8.8.8")
 	rootCmd.Flags().StringVar(&newPassword, "resetPassword", "", "Reset password to the one entered")
+	rootCmd.Flags().StringVarP(&parameterPath, "parameter", "P", "", "Parameter path.")
 }
 
 func main() {
@@ -84,13 +84,15 @@ func preRun(cmd *cobra.Command, args []string) {
 		update.Self(version)
 		os.Exit(0)
 	}
+	if parameterPath != "" {
+		if _, err := os.Stat(parameterPath); err != nil {
+			fmt.Println(err)
+			os.Exit(0)
+		}
+	}
 }
 
 func run() {
-	// check listen address
-	if _, err := net.ResolveTCPAddr("tcp", listen); err != nil {
-		log.Fatalf("Parse listen address failed! Exception: %s", err)
-	}
 	// set version
 	os.Setenv(web.VersionEnv, version)
 	if configFilePath != "" {
@@ -138,6 +140,22 @@ func start() {
 }
 
 func runWebServer() error {
+	var cfg *config.Parameter
+	if parameterPath != "" {
+		file, err := os.OpenFile(parameterPath, os.O_RDONLY, 0600)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+		cfg, err = config.ReadParameter(file)
+		if err != nil {
+			return err
+		}
+	} else {
+		cfg = &config.Parameter{
+			Listen: "127.0.0.1:12000",
+		}
+	}
 	// start static file server
 	http.HandleFunc("/static/", web.AuthAssert(staticFsFunc))
 	http.HandleFunc("/favicon.ico", web.AuthAssert(faviconFsFunc))
@@ -150,13 +168,15 @@ func runWebServer() error {
 	http.HandleFunc("/clearLog", web.Auth(web.ClearLog))
 	http.HandleFunc("/webhookTest", web.Auth(web.WebhookTest))
 
-	util.Log("Listening on %s", listen)
+	util.Log("Listening on %s", cfg.Listen)
 
-	l, err := net.Listen("tcp", listen)
+	l, err := net.Listen("tcp", cfg.Listen)
 	if err != nil {
 		return errors.New(util.LogStr("Failed to listen on the port, please check if the port is occupied! %s", err))
 	}
-
+	if cfg.TLS != nil {
+		return http.ServeTLS(l, nil, cfg.TLS.CertificatePath, cfg.TLS.KeyPath)
+	}
 	return http.Serve(l, nil)
 }
 

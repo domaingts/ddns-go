@@ -1,0 +1,4 @@
+listen: ':12000'
+tls:
+  certificate_path: /etc/ddns-go/cert/server.pem
+  key_path: /etc/ddns-go/cert/server.key
