@@ -65,7 +65,7 @@ func init() {
 	rootCmd.Flags().BoolVar(&skipVerify, "skipVerify", false, "Skip certificate verification")
 	rootCmd.Flags().StringVar(&customDNS, "dns", "", "Custom DNS server address, example: 8.8.8.8")
 	rootCmd.Flags().StringVar(&newPassword, "resetPassword", "", "Reset password to the one entered")
-	rootCmd.Flags().StringVarP(&parameterPath, "parameter", "P", "", "Parameter path.")
+	rootCmd.Flags().StringVarP(&parameterPath, "parameter", "p", "", "Parameter path.")
 }
 
 func main() {
