@@ -17,7 +17,7 @@ type TLSParameter struct {
 }
 
 func ReadParameter(in io.Reader) (*Parameter, error) {
-	var parameter *Parameter
+	parameter := &Parameter{}
 	err := yaml.NewDecoder(in).Decode(parameter)
 	return parameter, err
 }
