@@ -14,13 +14,18 @@ make_configuration_folder() {
   mkdir -p /etc/ddns-go
 }
 
+remove_temp() {
+    "rm" -r "$TEMPD"
+    echo "removed: $TEMPD"
+}
+
 download() {
     TEMPD="$(mktemp -d)"
     local temp_file
     temp_file="$(mktemp)"
     if ! curl -sS -H "Accept: application/vnd.github.v3+json" -o "$temp_file" 'https://api.github.com/repos/domaingts/ddns-go/releases/latest'; then
         "rm" "$temp_file"
-        "rm" -r "$TEMPD"
+        remove_temp
         echo 'error: Failed to get release list, please check your network.'
         exit 1
     fi
@@ -29,15 +34,14 @@ download() {
     local package="ddns-go-linux-amd64-v3.tar.gz"
     echo "https://github.com/domaingts/ddns-go/releases/download/$version/$package"
     if ! curl -f -R -H 'Cache-Control: no-cache' -o "$TEMPD/$package" "https://github.com/domaingts/ddns-go/releases/download/$version/$package"; then
-        "rm" -r "$TEMPD"
-        echo "removed: $TEMPD"
+        remove_temp
         exit 1
     fi
     tar Cxzvf "$TEMPD" "$TEMPD/$package"
     location="$TEMPD/ddns-go"
     mv "$location" /usr/local/bin/
     ddns-go -v | tee
-    "rm" -r "$TEMPD"
+    remove_temp
 }
 
 main() {
