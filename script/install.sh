@@ -28,7 +28,7 @@ download() {
     "rm" "$temp_file"
     local package="ddns-go-linux-amd64-v3.tar.gz"
     echo "https://github.com/domaingts/ddns-go/releases/download/$version/$package"
-    if ! curl -f -R -H ''Cache-Control: no-cache -o "$TEMPD/$package" "https://github.com/domaingts/ddns-go/releases/download/$version/$package"; then
+    if ! curl -f -R -H 'Cache-Control: no-cache' -o "$TEMPD/$package" "https://github.com/domaingts/ddns-go/releases/download/$version/$package"; then
         "rm" -r "$TEMPD"
         echo "removed: $TEMPD"
         exit 1
