@@ -27,7 +27,7 @@ download() {
     version="$(sed 'y/,/\n/' "$temp_file" | grep 'tag_name' | awk -F '"' '{print $4}')"
     "rm" "$temp_file"
     local package="ddns-go-linux-amd64-v3.tar.gz"
-    echo 'https://github.com/domaingts/ddns-go/releases/download/$version/$package'
+    echo "https://github.com/domaingts/ddns-go/releases/download/$version/$package"
     if ! curl -f -R -H ''Cache-Control: no-cache -o "$TEMPD/$package" "https://github.com/domaingts/ddns-go/releases/download/$version/$package"; then
         "rm" -r "$TEMPD"
         echo "removed: $TEMPD"
