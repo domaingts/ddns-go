@@ -23,7 +23,7 @@ download() {
     TEMPD="$(mktemp -d)"
     local temp_file
     temp_file="$(mktemp)"
-    if ! curl -sS -H "Accept: application/vnd.github.v3+json" -o "$temp_file" 'https://api.github.com/repos/domaingts/ddns-go/releases/latest'; then
+    if ! curl -4sS -H "Accept: application/vnd.github.v3+json" -o "$temp_file" 'https://api.github.com/repos/domaingts/ddns-go/releases/latest'; then
         "rm" "$temp_file"
         remove_temp
         echo 'error: Failed to get release list, please check your network.'
@@ -33,7 +33,7 @@ download() {
     "rm" "$temp_file"
     local package="ddns-go-linux-amd64-v3.tar.gz"
     echo "https://github.com/domaingts/ddns-go/releases/download/$version/$package"
-    if ! curl -fL -R -H 'Cache-Control: no-cache' -o "$TEMPD/$package" "https://github.com/domaingts/ddns-go/releases/download/$version/$package"; then
+    if ! curl -4fL -R -H 'Cache-Control: no-cache' -o "$TEMPD/$package" "https://github.com/domaingts/ddns-go/releases/download/$version/$package"; then
         remove_temp
         exit 1
     fi
