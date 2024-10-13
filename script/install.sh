@@ -18,7 +18,7 @@ download() {
     TEMPD="$(mktemp -d)"
     local temp_file
     temp_file="$(mktemp)"
-    if ! curl -sS -H "Accept: application/vnd.github.v3+json" -o "$temp_file" 'https://api.github.com/repos/ddns-go/realm/releases/latest'; then
+    if ! curl -sS -H "Accept: application/vnd.github.v3+json" -o "$temp_file" 'https://api.github.com/repos/domaingts/ddns-go/releases/latest'; then
         "rm" "$temp_file"
         "rm" -r "$TEMPD"
         echo 'error: Failed to get release list, please check your network.'
